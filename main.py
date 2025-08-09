@@ -39,7 +39,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "chains"))
+sys.path.append(os.path.join(os.path.dirname(
+    os.path.abspath(__file__)), "chains"))
 # Global objects
 try:
     # Attempt to initialize the advanced orchestrator
@@ -58,7 +59,8 @@ except Exception as e:
             def __init__(self):
                 super().__init__()  # This was missing
                 self.llm = None
-                self.workflows = {"multi_step_web_scraping": ModularWebScrapingWorkflow()}
+                self.workflows = {
+                    "multi_step_web_scraping": ModularWebScrapingWorkflow()}
 
         orchestrator = MinimalOrchestrator()
         logger.info("Created minimal orchestrator with fallback workflows")
@@ -71,7 +73,8 @@ app = FastAPI(  # FastAPI app instance
     description=API_DESCRIPTION,
     version=API_VERSION,
 )
-app.mount(f"/{STATIC_NAME}", StaticFiles(directory=STATIC_DIRECTORY), name=STATIC_NAME)  # Mount static files
+app.mount(f"/{STATIC_NAME}", StaticFiles(directory=STATIC_DIRECTORY),
+          name=STATIC_NAME)  # Mount static files
 
 
 # Health check and info endpoints
@@ -105,30 +108,40 @@ async def health_check():  # Health check endpoint
 class TaskRequest(BaseModel):  # Model for analysis task requests
     """Model for analysis task requests"""
 
-    task_description: str = Field(..., description="Description of the analysis task")
-    workflow_type: Optional[str] = Field(DEFAULT_WORKFLOW, description="Type of workflow to execute")
-    data_source: Optional[str] = Field(None, description="Optional data source information")
+    task_description: str = Field(...,
+                                  description="Description of the analysis task")
+    workflow_type: Optional[str] = Field(
+        DEFAULT_WORKFLOW, description="Type of workflow to execute")
+    data_source: Optional[str] = Field(
+        None, description="Optional data source information")
     dataset_info: Optional[Dict[str, Any]] = Field(
         default_factory=dict, description="Dataset characteristics and metadata"
     )
-    parameters: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional parameters for the task")
-    priority: Optional[str] = Field(DEFAULT_PRIORITY, description="Task priority: low, normal, high")
-    include_modeling: Optional[bool] = Field(False, description="Include predictive modeling in analysis")
-    target_audience: Optional[str] = Field(DEFAULT_TARGET_AUDIENCE, description="Target audience for reports")
+    parameters: Optional[Dict[str, Any]] = Field(
+        default_factory=dict, description="Additional parameters for the task")
+    priority: Optional[str] = Field(
+        DEFAULT_PRIORITY, description="Task priority: low, normal, high")
+    include_modeling: Optional[bool] = Field(
+        False, description="Include predictive modeling in analysis")
+    target_audience: Optional[str] = Field(
+        DEFAULT_TARGET_AUDIENCE, description="Target audience for reports")
 
 
 class WorkflowRequest(BaseModel):  # Model for specific workflow requests
     """Model for specific workflow requests"""
 
     workflow_type: str = Field(..., description="Type of workflow to execute")
-    input_data: Dict[str, Any] = Field(..., description="Input data for the workflow")
+    input_data: Dict[str, Any] = Field(...,
+                                       description="Input data for the workflow")
 
 
 class MultiStepWorkflowRequest(BaseModel):
     # Model for multi-step workflow requests
     """Model for multi-step workflow requests"""
-    steps: List[Dict[str, Any]] = Field(..., description="List of workflow steps to execute")
-    pipeline_type: Optional[str] = Field(DEFAULT_PIPELINE_TYPE, description="Type of pipeline")
+    steps: List[Dict[str, Any]
+                ] = Field(..., description="List of workflow steps to execute")
+    pipeline_type: Optional[str] = Field(
+        DEFAULT_PIPELINE_TYPE, description="Type of pipeline")
 
 
 class TaskResponse(BaseModel):  # Model for task response
@@ -137,9 +150,11 @@ class TaskResponse(BaseModel):  # Model for task response
     task_id: str = Field(..., description="Unique identifier for the task")
     status: str = Field(..., description="Task status")
     message: str = Field(..., description="Response message")
-    task_details: Dict[str, Any] = Field(..., description="Details of the submitted task")
+    task_details: Dict[str, Any] = Field(...,
+                                         description="Details of the submitted task")
     created_at: str = Field(..., description="Task creation timestamp")
-    workflow_result: Optional[Dict[str, Any]] = Field(None, description="LangChain workflow execution result")
+    workflow_result: Optional[Dict[str, Any]] = Field(
+        None, description="LangChain workflow execution result")
 
 
 def extract_output_requirements(
@@ -178,7 +193,8 @@ async def detect_workflow_type_llm(
     if not task_description:
         return default_workflow
 
-    logger.info(f"Detecting workflow type for task: {task_description[:100]}...")
+    logger.info(
+        f"Detecting workflow type for task: {task_description[:100]}...")
 
     try:
         if orchestrator and orchestrator.llm:
@@ -190,7 +206,8 @@ async def detect_workflow_type_llm(
                 ("human", WORKFLOW_DETECTION_HUMAN_PROMPT),
             ])
 
-            chain = LLMChain(llm=orchestrator.llm, prompt=workflow_detection_prompt)
+            chain = LLMChain(llm=orchestrator.llm,
+                             prompt=workflow_detection_prompt)
             result = chain.run(task_description=task_description)
 
             # Clean and validate the result
@@ -201,11 +218,13 @@ async def detect_workflow_type_llm(
                 logger.info(f"LLM detected workflow type: {detected_workflow}")
                 return detected_workflow
             else:
-                logger.warning(f"LLM returned invalid workflow: {detected_workflow}, " f"using fallback")
+                logger.warning(
+                    f"LLM returned invalid workflow: {detected_workflow}, " f"using fallback")
                 return detect_workflow_type_fallback(task_description, default_workflow)
 
         else:
-            logger.warning("LLM not available, using fallback workflow detection")
+            logger.warning(
+                "LLM not available, using fallback workflow detection")
             return detect_workflow_type_fallback(task_description, default_workflow)
 
     except Exception as e:
@@ -333,8 +352,10 @@ def prepare_workflow_parameters(
 
 @app.post("/api/")
 async def analyze_data(
-    questions_txt: UploadFile = File(..., description="Required questions.txt file"),
-    files: List[UploadFile] = File(default=[], description="Optional additional files"),
+    questions_txt: UploadFile = File(...,
+                                     description="Required questions.txt file"),
+    files: List[UploadFile] = File(
+        default=[], description="Optional additional files"),
 ):
     """
     Main endpoint that accepts multiple file uploads with required questions.txt.
@@ -360,7 +381,8 @@ async def analyze_data(
 
         questions_content = await questions_txt.read()
         questions_text = questions_content.decode("utf-8")
-        logger.info(f"Processed questions.txt with {len(questions_text)} characters")
+        logger.info(
+            f"Processed questions.txt with {len(questions_text)} characters")
 
         # Process additional files
         processed_files = {}
@@ -376,7 +398,8 @@ async def analyze_data(
                 except UnicodeDecodeError:
                     # Handle binary files (images, etc.)
                     file_contents[file.filename] = f"Binary file: {file.filename} ({len(content)} bytes)"
-                    logger.info(f"Processed binary file: {file.filename} " f"({len(content)} bytes)")
+                    logger.info(
+                        f"Processed binary file: {file.filename} " f"({len(content)} bytes)")
 
                 processed_files[file.filename] = {
                     "content_type": file.content_type,
@@ -407,16 +430,19 @@ async def analyze_data(
         logger.info(f"Additional files: {list(file_contents.keys())}")
 
         # Execute workflow synchronously (always within 3 minutes)
-        logger.info(f"Processing task {task_id} synchronously with " f"workflow: {detected_workflow}")
+        logger.info(
+            f"Processing task {task_id} synchronously with " f"workflow: {detected_workflow}")
 
         try:
             logger.info(f"Starting workflow execution for {detected_workflow}")
             result = await asyncio.wait_for(
-                execute_workflow_sync(detected_workflow, workflow_input, task_id), timeout=180  # 3 minutes
+                # 3 minutes
+                execute_workflow_sync(detected_workflow, workflow_input, task_id), timeout=180
             )
 
             logger.info(f"Task {task_id} completed successfully")
-            logger.info(f"Result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
+            logger.info(
+                f"Result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
 
             return {
                 "task_id": task_id,
@@ -436,17 +462,20 @@ async def analyze_data(
             logger.error(f"Task {task_id} timed out after 3 minutes")
             raise HTTPException(
                 status_code=408,
-                detail=("Request timed out after 3 minutes. Please simplify " "your request or try again."),
+                detail=(
+                    "Request timed out after 3 minutes. Please simplify " "your request or try again."),
             )
         except Exception as e:
             logger.error(f"Task {task_id} failed: {e}")
-            raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Processing failed: {str(e)}")
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error processing request: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error processing request: {str(e)}")
 
 
 async def execute_workflow_sync(
@@ -455,7 +484,8 @@ async def execute_workflow_sync(
     """Execute workflow synchronously with enhanced error handling"""
     try:
         if orchestrator is None:
-            logger.warning("No orchestrator available, cannot execute workflows")
+            logger.warning(
+                "No orchestrator available, cannot execute workflows")
             return {
                 "workflow_type": workflow_type,
                 "status": "completed_fallback",
@@ -473,8 +503,10 @@ async def execute_workflow_sync(
                 "files_processed": list(workflow_input.get("additional_files", {}).keys()),
             }
         else:
-            logger.info(f"Executing workflow {workflow_type} with orchestrator")
-            logger.info(f"Available workflows: {list(orchestrator.workflows.keys())}")
+            logger.info(
+                f"Executing workflow {workflow_type} with orchestrator")
+            logger.info(
+                f"Available workflows: {list(orchestrator.workflows.keys())}")
 
             if workflow_type not in orchestrator.workflows:
                 logger.warning(
@@ -488,7 +520,8 @@ async def execute_workflow_sync(
                 }
 
             result = await orchestrator.execute_workflow(workflow_type, workflow_input)
-            logger.info(f"Workflow {workflow_type} executed successfully for " f"task {task_id}")
+            logger.info(
+                f"Workflow {workflow_type} executed successfully for " f"task {task_id}")
             logger.info(f"Result type: {type(result)}")
             if isinstance(result, dict):
                 logger.info(f"Result keys: {list(result.keys())}")
@@ -500,3 +533,7 @@ async def execute_workflow_sync(
 
         logger.error(f"Traceback: {traceback.format_exc()}")
         raise e
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
