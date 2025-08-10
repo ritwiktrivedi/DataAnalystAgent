@@ -226,7 +226,7 @@ TEXT_KEYWORDS = [
 # Legal/Court keywords
 LEGAL_KEYWORDS = [
     "court", "judgment", "legal", "case", "disposal", "judge",
-    "cnr", "ecourts", "law", "litigation"
+    "cnr", "ecourts", "law", "litigation", ".csv"
 ]
 
 # Statistical analysis keywords
@@ -287,7 +287,8 @@ CODE_KEYWORDS = [
 WEB_KEYWORDS = ["scrape", "extract", "web", "html", "website"]
 
 # Additional hardcoded keyword lists for detection
-PLOT_CHART_KEYWORDS = ["plot", "chart", "graph", "visualization", "base64", "data uri"]
+PLOT_CHART_KEYWORDS = ["plot", "chart", "graph",
+                       "visualization", "base64", "data uri"]
 FORMAT_KEYWORDS = ["json", "csv", "table"]
 FINANCIAL_DETECTION_KEYWORDS = ["gross", "revenue", "profit"]
 RANKING_DETECTION_KEYWORDS = ["rank", "position", "top"]
