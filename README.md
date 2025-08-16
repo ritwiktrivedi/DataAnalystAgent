@@ -3,6 +3,8 @@
 **Project:** Multi-Modal Data Analysis API
 **Description:** FastAPI-based REST API that orchestrates LLM workflows for multi-modal data analysis (text, CSV, images, code generation, etc.). This is a generic, shareable README template with **no personal data**.
 
+Warning: This is a fallback version and not my main version. I may use this in case my version is not able to work or I may use a different fallback altogether.
+
 Note: This work is only a minor modification of https://github.com/MuthuPeru/DataAnalystAgent
 (This is much better than what I could come up with and is really helping me learn. I really wanted to undertand how we could use Langchain here and despite getting stuck in random errors, I kept trying. Now that I have Muthu's code to learn from, I will continute to work further to enhance my understanding. The original copyright and MIT license belongs to Muthu Peru.)
 
